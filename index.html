@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>生日快乐</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Microsoft YaHei", sans-serif;
+      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+      overflow: hidden;
+    }
+
+    .card {
+      width: 90%;
+      max-width: 700px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 24px;
+      padding: 40px 24px;
+      text-align: center;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 2;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 42px;
+      color: #ff4d6d;
+    }
+
+    h2 {
+      margin: 10px 0;
+      font-size: 30px;
+      color: #333;
+    }
+
+    p {
+      font-size: 18px;
+      color: #555;
+      line-height: 1.8;
+      margin: 12px 0;
+    }
+
+    .cake {
+      font-size: 70px;
+      margin-bottom: 10px;
+      animation: float 2s ease-in-out infinite;
+    }
+
+    button {
+      margin-top: 24px;
+      padding: 14px 28px;
+      font-size: 18px;
+      border: none;
+      border-radius: 999px;
+      background: #ff4d6d;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(255, 77, 109, 0.3);
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background: #ff3358;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .message {
+      margin-top: 20px;
+      animation: fadeIn 1.2s ease;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 16px;
+      top: -20px;
+      opacity: 0.9;
+      animation: fall linear forwards;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(110vh) rotate(720deg);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="cake">🎂</div>
+    <h1>生日快乐！</h1>
+    <p>愿你开心常在，所愿皆成真，未来闪闪发光。</p>
+
+    <button id="startBtn">点我收下这份小礼物</button>
+
+    <div id="message" class="message hidden">
+      <p>🎉 祝你生日快乐，天天开心，万事顺意！</p>
+      <p>希望这一岁，比上一岁更加幸福、自由、闪亮。✨</p>
+    </div>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+    const message = document.getElementById("message");
+
+    function createConfetti() {
+      const colors = ["#ff4d6d", "#ffd166", "#06d6a0", "#118ab2", "#9b5de5"];
+      for (let i = 0; i < 80; i++) {
+        const piece = document.createElement("div");
+        piece.className = "confetti";
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = (Math.random() * 3 + 2) + "s";
+        piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(piece);
+
+        setTimeout(() => {
+          piece.remove();
+        }, 5500);
+      }
+    }
+
+    async function playHappyBirthday() {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = new AudioContextClass();
+
+      const notes = {
+        C4: 261.63,
+        D4: 293.66,
+        E4: 329.63,
+        F4: 349.23,
+        G4: 392.00,
+        A4: 440.00,
+        Bb4: 466.16,
+        C5: 523.25
+      };
+
+      const melody = [
+        ["C4", 0.4], ["C4", 0.4], ["D4", 0.8], ["C4", 0.8], ["F4", 0.8], ["E4", 1.6],
+        ["C4", 0.4], ["C4", 0.4], ["D4", 0.8], ["C4", 0.8], ["G4", 0.8], ["F4", 1.6],
+        ["C4", 0.4], ["C4", 0.4], ["C5", 0.8], ["A4", 0.8], ["F4", 0.8], ["E4", 0.8], ["D4", 1.6],
+        ["Bb4", 0.4], ["Bb4", 0.4], ["A4", 0.8], ["F4", 0.8], ["G4", 0.8], ["F4", 1.8]
+      ];
+
+      let currentTime = audioCtx.currentTime;
+
+      melody.forEach(([note, duration]) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.value = notes[note];
+
+        gain.gain.setValueAtTime(0.001, currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.25, currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, currentTime + duration);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(currentTime);
+        osc.stop(currentTime + duration);
+
+        currentTime += duration;
+      });
+    }
+
+    startBtn.addEventListener("click", async () => {
+      startBtn.disabled = true;
+      startBtn.innerText = "生日祝福发送中...";
+      message.classList.remove("hidden");
+      createConfetti();
+
+      try {
+        await playHappyBirthday();
+      } catch (e) {
+        console.log("播放失败：", e);
+      }
+
+      startBtn.innerText = "愿你一直开心 ✨";
+    });
+  </script>
+</body>
+</html>
